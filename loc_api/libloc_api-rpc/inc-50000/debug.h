@@ -1,4 +1,4 @@
-/* Copyright (c) 2009,2011 Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -24,45 +24,46 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
-#include <hardware/gps.h>
+#ifndef DEBUG_H
+#define DEBUG_H
 
-#include <stdlib.h>
+#include <stdio.h>
 
-extern const GpsInterface* get_gps_interface();
+#define LOG_TAG "libgps-rpc"
+#include <utils/Log.h>
 
-const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev)
-{
-    return get_gps_interface();
-}
+#define PRINT(x...) do {                                    \
+        fprintf(stdout, "%s(%d) ", __FUNCTION__, __LINE__); \
+        fprintf(stdout, ##x);                               \
+        LOGD(x);                               \
+    } while(0)
 
-static int open_gps(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
-{
-    struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
-    memset(dev, 0, sizeof(*dev));
+#ifdef DEBUG
+#define D PRINT
+#else
+#define D(x...) do { } while(0)
+#endif
 
-    dev->common.tag = HARDWARE_DEVICE_TAG;
-    dev->common.version = 0;
-    dev->common.module = (struct hw_module_t*)module;
-    dev->get_gps_interface = gps__get_gps_interface;
+#ifdef VERBOSE
+#define V PRINT
+#else
+#define V(x...) do { } while(0)
+#endif
 
-    *device = (struct hw_device_t*)dev;
-    return 0;
-}
+#define E(x...) do {                                        \
+        fprintf(stderr, "%s(%d) ", __FUNCTION__, __LINE__); \
+        fprintf(stderr, ##x);                               \
+        LOGE(x);                                            \
+    } while(0)
 
-static struct hw_module_methods_t gps_module_methods = {
-    .open = open_gps
-};
+#define FAILIF(cond, msg...) do {                                              \
+        if (__builtin_expect (cond, 0)) {                                      \
+            fprintf(stderr, "%s:%s:(%d): ", __FILE__, __FUNCTION__, __LINE__); \
+            fprintf(stderr, ##msg);                                            \
+            LOGE(##msg);                                                       \
+        }                                                                      \
+    } while(0)
 
-struct hw_module_t HAL_MODULE_INFO_SYM = {
-    .tag = HARDWARE_MODULE_TAG,
-    .version_major = 1,
-    .version_minor = 0,
-    .id = GPS_HARDWARE_MODULE_ID,
-    .name = "loc_api GPS Module",
-    .author = "Qualcomm USA, Inc.",
-    .methods = &gps_module_methods,
-};
+#endif/*DEBUG_H*/

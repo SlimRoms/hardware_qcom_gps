@@ -1,4 +1,4 @@
-/* Copyright (c) 2009,2011 Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2011 Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -27,42 +27,29 @@
  *
  */
 
-#include <hardware/gps.h>
+#ifndef LOC_ENG_LOG_H
+#define LOC_ENG_LOG_H
 
-#include <stdlib.h>
+extern int loc_eng_callback_log_header(
+      rpc_loc_client_handle_type            client_handle,          /* client handle        */
+      rpc_loc_event_mask_type               loc_event,              /* event mask           */
+      const rpc_loc_event_payload_u_type*   loc_event_payload       /* payload              */
+);
 
-extern const GpsInterface* get_gps_interface();
+extern int loc_eng_callback_log(
+      rpc_loc_event_mask_type               loc_event,              /* event mask           */
+      const rpc_loc_event_payload_u_type*   loc_event_payload       /* payload              */
+);
 
-const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev)
-{
-    return get_gps_interface();
-}
+extern const char* loc_get_event_name(rpc_loc_event_mask_type loc_event_mask);
+extern const char* loc_get_ioctl_type_name(rpc_loc_ioctl_e_type ioctl_type);
+extern const char* loc_get_ioctl_status_name(uint32 status);
+extern const char* loc_get_sess_status_name(rpc_loc_session_status_e_type status);
+extern const char* loc_get_engine_state_name(rpc_loc_engine_state_e_type state);
+extern const char* loc_get_fix_session_state_name(rpc_loc_fix_session_state_e_type state);
+extern const char* log_succ_fail_string(int is_succ);
+extern const char* loc_get_gps_status_name(GpsStatusValue gps_status);
 
-static int open_gps(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
-{
-    struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
-    memset(dev, 0, sizeof(*dev));
+extern char *loc_eng_get_time(char *time_string);
 
-    dev->common.tag = HARDWARE_DEVICE_TAG;
-    dev->common.version = 0;
-    dev->common.module = (struct hw_module_t*)module;
-    dev->get_gps_interface = gps__get_gps_interface;
-
-    *device = (struct hw_device_t*)dev;
-    return 0;
-}
-
-static struct hw_module_methods_t gps_module_methods = {
-    .open = open_gps
-};
-
-struct hw_module_t HAL_MODULE_INFO_SYM = {
-    .tag = HARDWARE_MODULE_TAG,
-    .version_major = 1,
-    .version_minor = 0,
-    .id = GPS_HARDWARE_MODULE_ID,
-    .name = "loc_api GPS Module",
-    .author = "Qualcomm USA, Inc.",
-    .methods = &gps_module_methods,
-};
+#endif /* LOC_ENG_LOG_H */

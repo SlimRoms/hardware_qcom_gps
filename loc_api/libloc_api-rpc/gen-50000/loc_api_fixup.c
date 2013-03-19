@@ -1,4 +1,4 @@
-/* Copyright (c) 2009,2011 Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2011, Code Aurora Forum. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -24,45 +24,29 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
-#include <hardware/gps.h>
+#include <rpc/rpc.h>
 
-#include <stdlib.h>
+#include "loc_api_fixup.h"
 
-extern const GpsInterface* get_gps_interface();
+#ifdef ADD_XDR_FLOAT
 
-const GpsInterface* gps__get_gps_interface(struct gps_device_t* dev)
+int
+xdr_float(xdrp, fp)
+        XDR *xdrp;
+        float *fp;
 {
-    return get_gps_interface();
+        return xdr_long(xdrp, (long*)fp);
 }
 
-static int open_gps(const struct hw_module_t* module, char const* name,
-        struct hw_device_t** device)
+int
+xdr_double(xdrp, dp)
+        XDR *xdrp;
+        double *dp;
 {
-    struct gps_device_t *dev = malloc(sizeof(struct gps_device_t));
-    memset(dev, 0, sizeof(*dev));
-
-    dev->common.tag = HARDWARE_DEVICE_TAG;
-    dev->common.version = 0;
-    dev->common.module = (struct hw_module_t*)module;
-    dev->get_gps_interface = gps__get_gps_interface;
-
-    *device = (struct hw_device_t*)dev;
-    return 0;
+                return xdr_long(xdrp, (long*)dp + 1)
+                                && xdr_long(xdrp, (long*)dp);
 }
 
-static struct hw_module_methods_t gps_module_methods = {
-    .open = open_gps
-};
-
-struct hw_module_t HAL_MODULE_INFO_SYM = {
-    .tag = HARDWARE_MODULE_TAG,
-    .version_major = 1,
-    .version_minor = 0,
-    .id = GPS_HARDWARE_MODULE_ID,
-    .name = "loc_api GPS Module",
-    .author = "Qualcomm USA, Inc.",
-    .methods = &gps_module_methods,
-};
+#endif /* ADD_XDR_FLOAT */

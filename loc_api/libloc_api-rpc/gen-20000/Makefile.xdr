@@ -1,4 +1,4 @@
-# Copyright (c) 2009, QUALCOMM USA, INC. 
+# Copyright (c) 2009, QUALCOMM USA, INC.
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 # ·         Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
@@ -6,42 +6,33 @@
 # ·         Neither the name of the QUALCOMM USA, INC.  nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ifneq ($(TARGET_PROVIDES_GPS_LOC_API),true)
-ifneq ($(BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE),)
 
-LOCAL_PATH := $(call my-dir)
+CLIENTS:= loc_api
+SERVERS:= loc_api_cb
+COMMON:= loc_api_common
+RPC_INC:= inc-$(AMSS_VERSION)
 
-ifeq ($(filter 50000 20000,$(BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION)),)
+all: $(CLIENTS) $(SERVERS) $(COMMON) fixup
 
-GPS_DIR_LIST :=
+$(CLIENTS) $(SERVERS) $(COMMON):: xdr = $(@:=.xdr) 
 
-ifeq (exists, $(shell test -d $(TOP)/vendor/qcom/proprietary/qmi-framework && echo exists))
+$(CLIENTS) $(SERVERS) $(COMMON)::
+	rpcgen -h -M $(xdr) -o ../$(RPC_INC)/$(addsuffix .h, $@)
+	rpcgen -c -M $(xdr) -o $(addsuffix _xdr.c, $@)
 
-# add RPC dirs if RPC is available
-ifneq ($(TARGET_NO_RPC),true)
+$(CLIENTS)::
+	rpcgen -l -M $(xdr) -o $(addsuffix _clnt.c, $@)
 
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api-rpc-50001/
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api-rpc/
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api/
+$(SERVERS)::
+	rpcgen -m -M $(xdr) -o $(addsuffix _svc.c, $@)
 
-else
+fixup:
+	mv ../$(RPC_INC)/loc_api_common.h ../$(RPC_INC)/loc_api_common.h.bak
+	sed ../$(RPC_INC)/loc_api_common.h.bak -e "/#include <rpc/a#include \"loc_api_fixup.h\"" > ../$(RPC_INC)/loc_api_common.h
+	rm -f ../$(RPC_INC)/loc_api_common.h.bak
 
-GPS_DIR_LIST += $(LOCAL_PATH)/loc_api_v02/
-
-endif #TARGET_NO_RPC
-
-endif
-
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api_50001/
-
-#call the subfolders
-include $(addsuffix Android.mk, $(GPS_DIR_LIST))
-
-
-else # BOARD_VENDOR_QCOM_GPS_LOC_API_AMSS_VERSION == 50001
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api-rpc/
-GPS_DIR_LIST += $(LOCAL_PATH)/libloc_api/
-include $(addsuffix Android.mk, $(GPS_DIR_LIST))
-endif
-endif#BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE
-endif#TARGET_PROVIDES_GPS_LOC_API
+clean:
+	rm -f $(addsuffix _clnt.c, $(CLIENTS))
+	rm -f $(addsuffix _svc.c, $(SERVERS))
+	rm -f $(addsuffix _xdr.c, $(CLIENTS) $(SERVERS) $(COMMON))
+	rm -f $(addprefix ../$(RPC_INC)/, $(addsuffix .h, $(CLIENTS) $(SERVERS) $(COMMON)))
