@@ -12,12 +12,14 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libloc_adapter
+LOCAL_MODULE_OWNER := qcom
 
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SHARED_LIBRARIES := \
     libutils \
     libcutils \
+    liblog \
     libgps.utils \
     libdl
 
@@ -57,6 +59,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SHARED_LIBRARIES := \
     libutils \
     libcutils \
+    liblog \
     libloc_adapter \
     libgps.utils \
     libdl
@@ -102,8 +105,11 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_SHARED_LIBRARIES := \
     libutils \
     libcutils \
+    liblog \
     libloc_eng \
-    libgps.utils
+    libgps.utils \
+    libgeofence \
+    libdl
 
 LOCAL_SRC_FILES += \
     loc.cpp \

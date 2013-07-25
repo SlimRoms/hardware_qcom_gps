@@ -10,7 +10,8 @@ include $(CLEAR_VARS)
 ## Libs
 LOCAL_SHARED_LIBRARIES := \
     libutils \
-    libcutils
+    libcutils \
+    liblog
 
 LOCAL_SRC_FILES += \
     loc_log.cpp \
@@ -43,4 +44,4 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)
 include $(BUILD_SHARED_LIBRARY)
 endif # not BUILD_TINY_ANDROID
 endif # BOARD_VENDOR_QCOM_GPS_LOC_API_HARDWARE
-endif#TARGET_PROVIDES_GPS_LOC_API
+endif # TARGET_PROVIDES_GPS_LOC_API
