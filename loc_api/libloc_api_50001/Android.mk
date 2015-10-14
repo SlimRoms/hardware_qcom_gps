@@ -75,7 +75,7 @@ LOCAL_SHARED_LIBRARIES := \
     libgps.utils \
     libdl
 
-ifneq ($(filter $(TARGET_DEVICE), apq8084 msm8960), false)
+ifneq ($(filter $(TARGET_BOARD_PLATFORM), apq8084 msm8960), false)
 endif
 
 LOCAL_SRC_FILES += \
