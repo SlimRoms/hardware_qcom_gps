@@ -22,11 +22,13 @@
 #define ANDROID_HARDWARE_GNSS_V1_1_GNSS_H
 
 #include <AGnss.h>
+#include <AGnssRil.h>
 #include <GnssBatching.h>
 #include <GnssConfiguration.h>
 #include <GnssGeofencing.h>
 #include <GnssMeasurement.h>
 #include <GnssNi.h>
+#include <GnssDebug.h>
 
 #include <android/hardware/gnss/1.0/IGnss.h>
 #include <hidl/Status.h>
@@ -90,9 +92,7 @@ struct Gnss : public IGnss {
     Return<sp<IGnssGeofencing>> getExtensionGnssGeofencing() override;
     Return<sp<IGnssBatching>> getExtensionGnssBatching() override;
 
-    inline Return<sp<IAGnssRil>> getExtensionAGnssRil() override {
-        return nullptr;
-    }
+    Return<sp<IAGnssRil>> getExtensionAGnssRil() override;
 
     inline Return<sp<IGnssNavigationMessage>> getExtensionGnssNavigationMessage() override {
         return nullptr;
@@ -102,9 +102,7 @@ struct Gnss : public IGnss {
         return nullptr;
     }
 
-    inline Return<sp<IGnssDebug>> getExtensionGnssDebug() override {
-        return nullptr;
-    }
+    Return<sp<IGnssDebug>> getExtensionGnssDebug() override;
 
     // These methods are not part of the IGnss base class.
     GnssAPIClient* getApi();
@@ -130,6 +128,8 @@ struct Gnss : public IGnss {
     sp<GnssConfiguration> mGnssConfig = nullptr;
     sp<GnssGeofencing> mGnssGeofencingIface = nullptr;
     sp<GnssBatching> mGnssBatching = nullptr;
+    sp<IGnssDebug> mGnssDebug = nullptr;
+    sp<AGnssRil> mGnssRil = nullptr;
 
     GnssAPIClient* mApi = nullptr;
     sp<IGnssCallback> mGnssCbIface = nullptr;

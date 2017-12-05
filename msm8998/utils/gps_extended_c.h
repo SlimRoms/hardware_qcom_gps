@@ -87,6 +87,17 @@ extern "C" {
 #define LOC_AGPS_CERTIFICATE_MAX_LENGTH 2000
 #define LOC_AGPS_CERTIFICATE_MAX_SLOTS 10
 
+typedef uint32_t LocPosTechMask;
+#define LOC_POS_TECH_MASK_DEFAULT ((LocPosTechMask)0x00000000)
+#define LOC_POS_TECH_MASK_SATELLITE ((LocPosTechMask)0x00000001)
+#define LOC_POS_TECH_MASK_CELLID ((LocPosTechMask)0x00000002)
+#define LOC_POS_TECH_MASK_WIFI ((LocPosTechMask)0x00000004)
+#define LOC_POS_TECH_MASK_SENSORS ((LocPosTechMask)0x00000008)
+#define LOC_POS_TECH_MASK_REFERENCE_LOCATION ((LocPosTechMask)0x00000010)
+#define LOC_POS_TECH_MASK_INJECTED_COARSE_POSITION ((LocPosTechMask)0x00000020)
+#define LOC_POS_TECH_MASK_AFLT ((LocPosTechMask)0x00000040)
+#define LOC_POS_TECH_MASK_HYBRID ((LocPosTechMask)0x00000080)
+
 enum loc_registration_mask_status {
     LOC_REGISTRATION_MASK_ENABLED,
     LOC_REGISTRATION_MASK_DISABLED,
@@ -104,6 +115,7 @@ typedef struct {
     LocGpsLocation     gpsLocation;
     /* Provider indicator for HYBRID or GPS */
     uint16_t        position_source;
+    LocPosTechMask  tech_mask;
     /*allows HAL to pass additional information related to the location */
     int             rawDataSize;         /* in # of bytes */
     void            * rawData;
@@ -266,16 +278,41 @@ typedef uint16_t GpsLocationExtendedFlags;
 #define GPS_LOCATION_EXTENDED_HAS_HOR_ELIP_UNC_AZIMUTH 0x0800
 /** GpsLocationExtended has valid gnss sv used in position data */
 #define GPS_LOCATION_EXTENDED_HAS_GNSS_SV_USED_DATA 0x1000
+/** GpsLocationExtended has valid navSolutionMask */
+#define GPS_LOCATION_EXTENDED_HAS_NAV_SOLUTION_MASK 0x2000
+
+typedef uint32_t LocNavSolutionMask;
+/* Bitmask to specify whether SBAS ionospheric correction is used  */
+#define LOC_NAV_MASK_SBAS_CORRECTION_IONO ((LocNavSolutionMask)0x0001)
+/* Bitmask to specify whether SBAS fast correction is used  */
+#define LOC_NAV_MASK_SBAS_CORRECTION_FAST ((LocNavSolutionMask)0x0002)
+/**<  Bitmask to specify whether SBAS long-tem correction is used  */
+#define LOC_NAV_MASK_SBAS_CORRECTION_LONG ((LocNavSolutionMask)0x0004)
+/**<  Bitmask to specify whether SBAS integrity information is used  */
+#define LOC_NAV_MASK_SBAS_INTEGRITY ((LocNavSolutionMask)0x0008)
 
 /** GPS PRN Range */
 #define GPS_SV_PRN_MIN      1
 #define GPS_SV_PRN_MAX      32
 #define GLO_SV_PRN_MIN      65
 #define GLO_SV_PRN_MAX      96
+#define QZSS_SV_PRN_MIN     193
+#define QZSS_SV_PRN_MAX     197
 #define BDS_SV_PRN_MIN      201
 #define BDS_SV_PRN_MAX      235
 #define GAL_SV_PRN_MIN      301
 #define GAL_SV_PRN_MAX      336
+
+typedef uint32_t LocPosTechMask;
+#define LOC_POS_TECH_MASK_DEFAULT ((LocPosTechMask)0x00000000)
+#define LOC_POS_TECH_MASK_SATELLITE ((LocPosTechMask)0x00000001)
+#define LOC_POS_TECH_MASK_CELLID ((LocPosTechMask)0x00000002)
+#define LOC_POS_TECH_MASK_WIFI ((LocPosTechMask)0x00000004)
+#define LOC_POS_TECH_MASK_SENSORS ((LocPosTechMask)0x00000008)
+#define LOC_POS_TECH_MASK_REFERENCE_LOCATION ((LocPosTechMask)0x00000010)
+#define LOC_POS_TECH_MASK_INJECTED_COARSE_POSITION ((LocPosTechMask)0x00000020)
+#define LOC_POS_TECH_MASK_AFLT ((LocPosTechMask)0x00000040)
+#define LOC_POS_TECH_MASK_HYBRID ((LocPosTechMask)0x00000080)
 
 typedef enum {
     LOC_RELIABILITY_NOT_SET = 0,
@@ -297,6 +334,7 @@ typedef struct {
     uint64_t glo_sv_used_ids_mask;
     uint64_t gal_sv_used_ids_mask;
     uint64_t bds_sv_used_ids_mask;
+    uint64_t qzss_sv_used_ids_mask;
 } GnssSvUsedInPosition;
 
 /** Represents gps location extended. */
@@ -335,6 +373,10 @@ typedef struct {
     Gnss_ApTimeStampStructType               timeStamp;
     /** Gnss sv used in position data */
     GnssSvUsedInPosition gnss_sv_used_ids;
+    /** Nav solution mask to indicate sbas corrections */
+    LocNavSolutionMask  navSolutionMask;
+    /** Position technology used in computing this fix */
+    LocPosTechMask tech_mask;
 } GpsLocationExtended;
 
 enum loc_sess_status {
@@ -342,17 +384,6 @@ enum loc_sess_status {
     LOC_SESS_INTERMEDIATE,
     LOC_SESS_FAILURE
 };
-
-typedef uint32_t LocPosTechMask;
-#define LOC_POS_TECH_MASK_DEFAULT ((LocPosTechMask)0x00000000)
-#define LOC_POS_TECH_MASK_SATELLITE ((LocPosTechMask)0x00000001)
-#define LOC_POS_TECH_MASK_CELLID ((LocPosTechMask)0x00000002)
-#define LOC_POS_TECH_MASK_WIFI ((LocPosTechMask)0x00000004)
-#define LOC_POS_TECH_MASK_SENSORS ((LocPosTechMask)0x00000008)
-#define LOC_POS_TECH_MASK_REFERENCE_LOCATION ((LocPosTechMask)0x00000010)
-#define LOC_POS_TECH_MASK_INJECTED_COARSE_POSITION ((LocPosTechMask)0x00000020)
-#define LOC_POS_TECH_MASK_AFLT ((LocPosTechMask)0x00000040)
-#define LOC_POS_TECH_MASK_HYBRID ((LocPosTechMask)0x00000080)
 
 // Nmea sentence types mask
 typedef uint32_t NmeaSentenceTypesMask;
@@ -373,14 +404,15 @@ typedef uint32_t NmeaSentenceTypesMask;
 #define LOC_NMEA_MASK_GAGGA_V02 ((NmeaSentenceTypesMask)0x00004000) /**<  Enable GAGGA type  */
 #define LOC_NMEA_MASK_PQGSA_V02 ((NmeaSentenceTypesMask)0x00008000) /**<  Enable PQGSA type  */
 #define LOC_NMEA_MASK_PQGSV_V02 ((NmeaSentenceTypesMask)0x00010000) /**<  Enable PQGSV type  */
+#define LOC_NMEA_MASK_DEBUG_V02 ((NmeaSentenceTypesMask)0x00020000) /**<  Enable DEBUG type  */
+
 #define LOC_NMEA_ALL_SUPPORTED_MASK  (LOC_NMEA_MASK_GGA_V02 | LOC_NMEA_MASK_RMC_V02 | \
               LOC_NMEA_MASK_GSV_V02 | LOC_NMEA_MASK_GSA_V02 | LOC_NMEA_MASK_VTG_V02 | \
         LOC_NMEA_MASK_PQXFI_V02 | LOC_NMEA_MASK_PSTIS_V02 | LOC_NMEA_MASK_GLGSV_V02 | \
         LOC_NMEA_MASK_GNGSA_V02 | LOC_NMEA_MASK_GNGNS_V02 | LOC_NMEA_MASK_GARMC_V02 | \
         LOC_NMEA_MASK_GAGSV_V02 | LOC_NMEA_MASK_GAGSA_V02 | LOC_NMEA_MASK_GAVTG_V02 | \
-        LOC_NMEA_MASK_GAGGA_V02 | LOC_NMEA_MASK_PQGSA_V02 | LOC_NMEA_MASK_PQGSV_V02 )
-
-
+        LOC_NMEA_MASK_GAGGA_V02 | LOC_NMEA_MASK_PQGSA_V02 | LOC_NMEA_MASK_PQGSV_V02 | \
+        LOC_NMEA_MASK_DEBUG_V02 )
 
 typedef enum {
   LOC_ENG_IF_REQUEST_SENDER_ID_QUIPC = 0,
@@ -414,6 +446,8 @@ enum loc_api_adapter_err {
     LOC_API_ADAPTER_ERR_TIMEOUT             = 8,
     LOC_API_ADAPTER_ERR_SERVICE_NOT_PRESENT = 9,
     LOC_API_ADAPTER_ERR_INTERNAL            = 10,
+    LOC_API_ADAPTER_ERR_ALREADY_INITIALIZED = 11,
+    LOC_API_ADAPTER_ERR_OCCUPIED            = 12,
 
     /* equating engine down to phone offline, as they are the same errror */
     LOC_API_ADAPTER_ERR_ENGINE_DOWN         = LOC_API_ADAPTER_ERR_PHONE_OFFLINE,
@@ -451,6 +485,7 @@ enum loc_api_adapter_event_index {
     LOC_API_ADAPTER_GNSS_MEASUREMENT,                  // GNSS Measurement report
     LOC_API_ADAPTER_REQUEST_TIMEZONE,                  // Timezone injection request
     LOC_API_ADAPTER_REPORT_GENFENCE_DWELL_REPORT,      // Geofence dwell report
+    LOC_API_ADAPTER_REQUEST_SRN_DATA,                  // request srn data from AP
     LOC_API_ADAPTER_EVENT_MAX
 };
 
@@ -483,6 +518,8 @@ enum loc_api_adapter_event_index {
 #define LOC_API_ADAPTER_BIT_GNSS_MEASUREMENT                 (1<<LOC_API_ADAPTER_GNSS_MEASUREMENT)
 #define LOC_API_ADAPTER_BIT_REQUEST_TIMEZONE                 (1<<LOC_API_ADAPTER_REQUEST_TIMEZONE)
 #define LOC_API_ADAPTER_BIT_REPORT_GENFENCE_DWELL            (1<<LOC_API_ADAPTER_REPORT_GENFENCE_DWELL_REPORT)
+#define LOC_API_ADAPTER_BIT_REQUEST_SRN_DATA                 (1<<LOC_API_ADAPTER_REQUEST_SRN_DATA)
+
 
 typedef unsigned int LOC_API_ADAPTER_EVENT_MASK_T;
 
@@ -1092,6 +1129,34 @@ typedef struct
     /* Coefficients of velocity poly */
     uint32_t    enhancedIOD;    /*  Enhanced Reference Time */
 } GnssSvPolynomial;
+
+/* Various Short Range Node Technology type*/
+typedef enum {
+    SRN_AP_DATA_TECH_TYPE_NONE,
+    SRN_AP_DATA_TECH_TYPE_BT,
+    SRN_AP_DATA_TECH_TYPE_BTLE,
+    SRN_AP_DATA_TECH_TYPE_NFC,
+    SRN_AP_DATA_TECH_TYPE_MOBILE_CODE,
+    SRN_AP_DATA_TECH_TYPE_OTHER
+} Gnss_SrnTech;
+
+/* Mac Address type requested by modem */
+typedef enum {
+    SRN_AP_DATA_PUBLIC_MAC_ADDR_TYPE_INVALID, /* No valid mac address type send */
+    SRN_AP_DATA_PUBLIC_MAC_ADDR_TYPE_PUBLIC, /* SRN AP MAC Address type PUBLIC  */
+    SRN_AP_DATA_PUBLIC_MAC_ADDR_TYPE_PRIVATE, /* SRN AP MAC Address type PRIVATE  */
+    SRN_AP_DATA_PUBLIC_MAC_ADDR_TYPE_OTHER, /* SRN AP MAC Address type OTHER  */
+}Gnss_Srn_MacAddr_Type;
+
+typedef struct
+{
+    size_t                 size;
+    Gnss_SrnTech           srnTechType; /* SRN Technology type in request */
+    bool                   srnRequest; /* scan - start(true) or stop(false) */
+    bool                   e911Mode; /* If in E911 emergency */
+    Gnss_Srn_MacAddr_Type  macAddrType; /* SRN AP MAC Address type */
+} GnssSrnDataReq;
+
 
 #ifdef __cplusplus
 }
