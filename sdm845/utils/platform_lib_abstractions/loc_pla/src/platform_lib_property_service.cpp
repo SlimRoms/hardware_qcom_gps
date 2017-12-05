@@ -25,21 +25,15 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "platform_lib_property_service.h"
 
-#ifndef __PLATFORM_LIB_ANDROID_RUNTIME_H__
-#define __PLATFORM_LIB_ANDROID_RUNTIME_H__
+#ifdef USE_GLIB
+#include <loc_stub_property_service.h>
+#else
+#include <cutils/properties.h>
+#endif /* USE_GLIB */
 
-#include <pthread.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-pthread_t platform_lib_abstraction_createJavaThread(const char* name, void (*start)(void *), void* arg);
-#define LOC_EXT_CREATE_THREAD_CB_PLATFORM_LIB_ABSTRACTION platform_lib_abstraction_createJavaThread
-
-#ifdef __cplusplus
+int platform_lib_abstraction_property_get(const char *key, char *value, const char *default_value)
+{
+    return property_get(key, value, default_value);
 }
-#endif /* __cplusplus */
-
-#endif /*__PLATFORM_LIB_ANDROID_RUNTIME_H__ */

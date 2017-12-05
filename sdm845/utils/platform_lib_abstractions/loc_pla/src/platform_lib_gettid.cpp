@@ -26,15 +26,21 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "platform_lib_android_runtime.h"
+#include "platform_lib_gettid.h"
 
 #ifdef USE_GLIB
-#include <loc_stub_android_runtime.h>
+#include <loc_stub_gettid.h>
+
+#include <errno.h>
+const char* getprogname() {
+    return program_invocation_short_name;
+}
+
 #else
-#include <android_runtime/AndroidRuntime.h>
+#include <unistd.h>
 #endif /* USE_GLIB */
 
-pthread_t platform_lib_abstraction_createJavaThread(const char* name, void (*start)(void *), void* arg)
+pid_t platform_lib_abstraction_gettid()
 {
-    return (pthread_t)android::AndroidRuntime::createJavaThread(name, start, arg);
+    return gettid();
 }
