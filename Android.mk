@@ -9,6 +9,9 @@ ifneq ($(BOARD_IS_AUTOMOTIVE),true)
       ifneq ($(filter apq8064,$(TARGET_BOARD_PLATFORM)),)
         #For apq8064 use msm8960
         include $(call all-named-subdir-makefiles,msm8960)
+      else ifneq ($(filter msm8974 ,$(TARGET_BOARD_PLATFORM)),)
+        #For msm8974 target
+        include $(call all-named-subdir-makefiles,msm8974)
       else ifneq ($(filter msm8992,$(TARGET_BOARD_PLATFORM)),)
         #For msm8992 use msm8994
         include $(call all-named-subdir-makefiles,msm8994)
